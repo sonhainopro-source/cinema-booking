@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Vuln Admin Lab - Dashboard</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #222; color: white; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #555; padding: 10px; text-align: left; }
+        th { background: #333; }
+        #error { color: red; font-size: 20px; font-weight: bold; text-align: center; margin-top: 50px; }
+    </style>
+</head>
+<body>
+    <h1>Admin Dashboard</h1>
+    <button onclick="logout()" style="padding: 10px; background: red; color: white; border: none; cursor: pointer;">Đăng xuất</button>
+    
+    <div id="error"></div>
+    <table id="userTable" style="display: none;">
+        <thead>
+            <tr><th>ID</th><th>Username</th><th>Role</th></tr>
+        </thead>
+        <tbody id="userList"></tbody>
+    </table>
+
+    <script>
+        // Hàm tải dữ liệu
+        async function loadData() {
+            const res = await fetch('/api/admin/users');
+            if (res.status === 401 || res.status === 403) {
+                document.getElementById('error').innerText = "Truy cập bị từ chối! Bạn không phải Admin.";
+                return;
+            }
+            
+            const data = await res.json();
+            const table = document.getElementById('userTable');
+            const list = document.getElementById('userList');
+            
+            table.style.display = 'table';
+            list.innerHTML = data.users.map(u => `<tr><td>${u.id}</td><td>${u.username}</td><td>${u.role}</td></tr>`).join('');
+        }
+
+        function logout() {
+            document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            window.location.href = '/';
+        }
+
+        loadData();
+    </script>
+</body>
+</html>
